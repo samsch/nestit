@@ -6,6 +6,7 @@
 example
 .gitignore
 index.test.js
+massivejoin.json
 newnest.json
 oldernest.json
 prevnest.json
