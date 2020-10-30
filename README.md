@@ -113,7 +113,7 @@ lower level tool, you can abstract it the best way for your app.
 ## Usage example
 
 ```js
-const nestit = require('nestit');
+const nestit = require('@samsch/nestit');
 
 Promise.try(() => {
 	return knex('users')
