@@ -1,0 +1,12 @@
+.vscode
+.env
+.DS_STORE
+.parcel-cache
+
+example
+.gitignore
+index.test.js
+newnest.json
+oldernest.json
+prevnest.json
+timer.js
