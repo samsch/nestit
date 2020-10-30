@@ -99,7 +99,7 @@ Limitations:
 - Requires your select has the parent relations ordered first
 - Requires some annoying fiddling with knex options and query-response event
 - Requires you to give it relation data.
-- [Performance implications](Performance-notes) for large datasets
+- [Performance implications](#Performance-notes) for large datasets
 
 So, it's common for ORMs to do this kinda thing, and they solve these above
 problems by having the relation data pre-defined in "models", ordering the
