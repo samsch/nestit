@@ -1,5 +1,8 @@
 # PostgreSQL Join data relation hydrator
 
+[![npm package](https://img.shields.io/npm/v/@samsch/nestit?color=lightblue)](https://www.npmjs.com/package/@samsch/nestit)
+[![Github repo](https://img.shields.io/badge/Github-repo-success)](https://github.com/samsch/nestit)
+
 Turns the denormalized output of a normal join into the nested data structure you actually want!
 
 Note that normally you should write your queries to use json_agg and similar PostgreSQL functions rather than doing this aggregation on your client. This tool is for cases where you can't or you find the performance of this to be better.
@@ -160,9 +163,9 @@ Promise.try(() => {
 
 UPDATED:
 
-Previously my notes here state that using Nestit was probably a good performance choice for normal amounts of query data. This was based on some flawed tests which didn't have the appropriate data indexes on the foreign key fields. Missing those indexes causes the json_agg queries to take *much* longer.
+Previously my notes here stated that using Nestit was probably a good performance choice for normal amounts of query data. This was based on some flawed tests which didn't have the appropriate data indexes on the foreign key fields. Missing those indexes causes the json_agg queries to take *much* longer.
 
-With indexes on the foreign keys, using json_agg with various types of joins will generally perform the best across a variety of query result sizes and nesting levels.
+With indexes on the foreign keys, using json_agg with various types of joins will generally perform better across a variety of query result sizes and nesting levels than using Nestit with plain join output.
 
 ### Some very un-scientifically sourced numbers.
 
@@ -172,7 +175,7 @@ The dataset is generated 5000 users, 29810 posts, 177741 comments. About 6 posts
 :-----:|:-----:|:-----:|:-----:|:-----:
 Simple Join|4.4ms|2.8ms|400ms|1587ms
 Nestit|.1ms|8.6ms|66ms|332ms
-Sum (Simple Join + Nestit)|4.5ms|11.3ms|466ms|1919ms
+**Sum (Simple Join + Nestit)**|**4.5ms**|**11.3ms**|**466ms**|**1919ms**
 Lateral json\_agg|1.1ms|2.1ms|243ms|1026ms
 Select Subquery json\_agg|1.1ms|2.2ms|232ms|1002ms
 Join Subquery json\_agg|1.4ms|576ms|640ms|860ms

@@ -12,7 +12,8 @@
     "nesting",
     "join"
   ],
-  "author": "",
+  "repository": "github:samsch/nestit",
+  "author": "Samuel Scheiderich",
   "license": "0BSD",
   "devDependencies": {
     "@samsch/eslint-config-default": "^0.1.0",
