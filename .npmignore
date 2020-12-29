@@ -3,6 +3,7 @@
 .DS_STORE
 .parcel-cache
 
+testing
 example
 .gitignore
 index.test.js

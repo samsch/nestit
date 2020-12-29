@@ -1,0 +1,13 @@
+{
+ "private": true,
+ "name": "testing",
+ "version": "0.0.1-testing-subdir",
+ "dependencies": {
+  "@samsch/smart-migrations": "^0.2.1",
+  "bluebird": "^3.7.2",
+  "faker": "^5.1.0",
+  "knex": "^0.21.14",
+  "pg": "^8.5.1",
+  "uuid": "^8.3.2"
+ }
+}

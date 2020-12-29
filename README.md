@@ -2,6 +2,8 @@
 
 Turns the denormalized output of a normal join into the nested data structure you actually want!
 
+Note that normally you should write your queries to use json_agg and similar PostgreSQL functions rather than doing this aggregation on your client. This tool is for cases where you can't or you find the performance of this to be better.
+
 ```js
 // Input
 // Fields data from `pg`, a little config:
@@ -99,7 +101,7 @@ Limitations:
 - Requires your select has the parent relations ordered first
 - Requires some annoying fiddling with knex options and query-response event
 - Requires you to give it relation data.
-- [Performance implications](#Performance-notes) for large datasets
+- [Performance implications](#Performance-notes)
 
 So, it's common for ORMs to do this kinda thing, and they solve these above
 problems by having the relation data pre-defined in "models", ordering the
@@ -156,45 +158,29 @@ Promise.try(() => {
 
 ## Performance notes
 
-For small amounts of rows, maybe into hundreds, maybe not, this will probably
-perform better than using json_agg or similar in PostgreSQL to have the
-database do the nesting for you. However, for larger row counts, at some point
-doing it in the database will become faster, and would be slow enough here to
-start blocking for significant amounts of time.
+UPDATED:
 
-As an example, with 171 rows, 3 users, 21 posts, 147 comments, the nesting time
-measures at ~.5ms on my desktop. Query time around 33ms including retrieval.
+Previously my notes here state that using Nestit was probably a good performance choice for normal amounts of query data. This was based on some flawed tests which didn't have the appropriate data indexes on the foreign key fields. Missing those indexes causes the json_agg queries to take *much* longer.
 
-With 215576 rows, 5001 users, 30057 posts, 180518 comments, the nesting time is
-over 300ms. Query times are 750ms+.
+With indexes on the foreign keys, using json_agg with various types of joins will generally perform the best across a variety of query result sizes and nesting levels.
 
-Here's an example of a json_agg implementation for the same query as above,
-which will take around 750ms for the 200k+ rows, but not require the 300ms
-nesting time. The flipside is that for the smaller dataset, it still takes over
-500ms, so the other option is much faster in that case.
+### Some very un-scientifically sourced numbers.
 
-```js
-knex
-  .select([
-    'users.*',
-    knex.raw('json_agg("posts" order by "posts"."id") as posts')
-  ])
-  .from('users')
-  .leftJoin(function () {
-    this.select(['posts.*', knex.raw('json_agg("comments" order by "comments"."id") as comments')])
-      .from('posts')
-      .leftJoin('comments', { 'posts.id': 'comments.post' })
-      .groupBy('posts.id')
-      .as('posts')
-  }, { 'users.id': 'posts.user' })
-  .where('users.login', 'like', 'fixedvalue---%')
-  .groupBy('users.id')
-  .orderBy('users.id');
-```
+The dataset is generated 5000 users, 29810 posts, 177741 comments. About 6 posts per user, 6 comments per post on average. The real data has random amounts of posts and comments per parent row. For the numbers below, I made sure the single record had at least several posts and comments. I'm personally biased a bit against using Nestit instead of json_agg solutions. I think having the database do it is better.
 
-`pg` and thus `knex` will automatically parse the json column output, and this
-will give you relatively faster results when looking at hundreds of thousands
-of rows.
+||**1 base row**|**3 base rows**|**1250 base rows**|**5000 base rows (full dataset)**
+:-----:|:-----:|:-----:|:-----:|:-----:
+Simple Join|4.4ms|2.8ms|400ms|1587ms
+Nestit|.1ms|8.6ms|66ms|332ms
+Sum (Simple Join + Nestit)|4.5ms|11.3ms|466ms|1919ms
+Lateral json\_agg|1.1ms|2.1ms|243ms|1026ms
+Select Subquery json\_agg|1.1ms|2.2ms|232ms|1002ms
+Join Subquery json\_agg|1.4ms|576ms|640ms|860ms
 
-If you are concerned about performance, you should test these options with
-your real data, rather than trying to guess.
+The queries used can be seen in `testing/queries/`.
+
+### My performance takeaways
+
+Lateral joins are a fairly new feature, but for "normal" amounts of data you'd be dealing with for building user interfaces and such, it has really great performance. Unfortunately, Knex doesn't directly support this yet (https://github.com/knex/knex/issues/3732). Select subqueries are the most practical to use with Knex currently, and in my opinion the easiest to write an automatic nesting abstraction for. On the flipside, the SQL output is the hardest of all of them to read. Join subqueries are easy to write, pretty easy to understand, but they have severe performance issues for small amounts of data beyond a single base row. My guess here is the query planner is optimizing for the full size of the dataset when it knows it's getting more than a single record. This would also explain why this query takes the least time for the full dataset.
+
+If your application is performance sensitive, I would recommend doing your own testing with realistic data. Don't forget indexes on the foreign keys!
