@@ -1,6 +1,6 @@
 {
   "name": "@samsch/nestit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Nesting function for pg join output",
   "main": "index.js",
   "scripts": {
