@@ -1,12 +1,17 @@
 {
   "name": "@samsch/nestit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Nesting function for pg join output",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["pg", "knex", "nesting", "join"],
+  "keywords": [
+    "pg",
+    "knex",
+    "nesting",
+    "join"
+  ],
   "author": "",
   "license": "0BSD",
   "devDependencies": {
